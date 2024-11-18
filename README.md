@@ -16,7 +16,7 @@ This is a 3D multiplayer Tower Defense game built with **Node.js**, **Socket.IO*
 ### 1. Install Dependencies
 - Clone or extract this project to your server.
 - Navigate to the project folder in your terminal.
-- Run the following commands:
+- Install dependencies, including Three.js, using npm:
   ```bash
   npm install
   ```
@@ -54,6 +54,45 @@ This is a 3D multiplayer Tower Defense game built with **Node.js**, **Socket.IO*
 - Once the server is running, access the game in your browser at:
   ```
   http://your-server-domain/game
+  ```
+
+---
+
+## Using Three.js with npm
+Three.js is included as a dependency in this project via npm. The import statement is already added in the `public/game.js` file:
+```javascript
+import * as THREE from 'three';
+```
+Ensure that you run `npm install` to download the required dependencies before starting the server.
+
+---
+
+## Troubleshooting
+
+### **1. Error: Cannot find module 'express'**
+This error occurs when the `express` dependency is not installed. Follow these steps to resolve it:
+1. Install the missing dependency:
+   ```bash
+   npm install express
+   ```
+2. If your project uses **Socket.IO**, install it as well:
+   ```bash
+   npm install socket.io
+   ```
+3. Start the server again:
+   ```bash
+   node server.js
+   ```
+
+If the problem persists:
+- Clear the npm cache:
+  ```bash
+  npm cache clean --force
+  ```
+- Remove `node_modules` and `package-lock.json`, then reinstall dependencies:
+  ```bash
+  rm -rf node_modules package-lock.json
+  npm install
   ```
 
 ---

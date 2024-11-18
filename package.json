@@ -1,0 +1,26 @@
+{
+  "name": "towerdefencewithai",
+  "version": "1.0.0",
+  "description": "## Overview This is a 3D multiplayer Tower Defense game built with **Node.js**, **Socket.IO**, and **Three.js**. Players can collaboratively defend against waves of enemies by placing towers, which attack incoming enemies. The game supports real-time updates and is accessible at a custom path like `/game`.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markopajugit/gameAItest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markopajugit/gameAItest/issues"
+  },
+  "homepage": "https://github.com/markopajugit/gameAItest#readme",
+  "dependencies": {
+    "express": "^4.21.1",
+    "socket.io": "^4.8.1",
+    "three": "^0.170.0"
+  }
+}
