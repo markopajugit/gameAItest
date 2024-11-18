@@ -1,7 +1,8 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.js';
-import { io } from 'socket.io-client';
 
-const socket = io();
+// Use the global "io" object provided by the Socket.IO CDN
+const socket = io(); // Connect to the server
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
