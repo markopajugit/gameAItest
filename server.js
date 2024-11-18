@@ -1,45 +1,42 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const fastEnemy = require('./features/enemies/fastEnemy');
+const tankEnemy = require('./features/enemies/tankEnemy');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use('/game', express.static('public')); // Serve the game at /game
+app.use('/game', express.static('public')); // Serve the game
 
-// Persistent game state
+// Game state
 let gameState = {
     towers: {},         // { playerId: [{ x, y, range, damage }] }
-    enemies: [],        // [{ id, x, y, health }]
+    enemies: [],        // [{ id, x, y, health, type }]
     health: 20,         // Shared health
     gold: {},           // { playerId: goldAmount }
 };
 
-// Enemy spawn logic
+// Registry of enemy types
+const enemyTypes = {
+    fast: fastEnemy,
+    tank: tankEnemy,
+};
+
+// Spawn enemies
 function spawnEnemy() {
-    const id = Date.now();
-    const newEnemy = [
-        { id, x: 50, y: 50, health: 100, path: 'lane1' }, // Lane 1
-        { id: id + 1, x: 750, y: 50, health: 100, path: 'lane2' }, // Lane 2
-    ];
-    gameState.enemies.push(...newEnemy);
+    const type = Math.random() > 0.5 ? 'fast' : 'tank';
+    const enemy = enemyTypes[type].createEnemy();
+    gameState.enemies.push(enemy);
     broadcastGameState();
 }
 
-// Enemy movement logic
+// Move enemies
 function moveEnemies() {
     gameState.enemies.forEach((enemy) => {
-        if (enemy.path === 'lane1') {
-            enemy.y += 2; // Move downwards
-            if (enemy.y >= 300) enemy.path = 'merge'; // Merge at midpoint
-        } else if (enemy.path === 'lane2') {
-            enemy.y += 2; // Move downwards
-            if (enemy.y >= 300) enemy.path = 'merge'; // Merge at midpoint
-        } else if (enemy.path === 'merge') {
-            enemy.x += enemy.x < 400 ? 1 : -1; // Move toward center
-            enemy.y += 2; // Continue downwards
-        }
+        const movement = enemy.speed;
+        enemy.y += movement;
         if (enemy.y > 600) {
             gameState.health -= 1;
             enemy.health = 0; // Mark for removal
@@ -54,12 +51,12 @@ function moveEnemies() {
     }
 }
 
-// Broadcast game state to all players
+// Broadcast game state
 function broadcastGameState() {
     io.emit('game-state', gameState);
 }
 
-// Reset game state
+// Reset game
 function resetGame() {
     gameState = {
         towers: {},
@@ -69,18 +66,13 @@ function resetGame() {
     };
 }
 
-// Set up server-side events
+// Player connection
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id}`);
-
-    // Initialize player-specific data
     gameState.towers[socket.id] = [];
     gameState.gold[socket.id] = 200;
-
-    // Send initial game state
     socket.emit('game-state', gameState);
 
-    // Handle tower placement
     socket.on('place-tower', (tower) => {
         if (gameState.gold[socket.id] >= 50) {
             gameState.gold[socket.id] -= 50;
@@ -89,9 +81,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle disconnection
     socket.on('disconnect', () => {
-        console.log(`Player disconnected: ${socket.id}`);
         delete gameState.towers[socket.id];
         delete gameState.gold[socket.id];
     });
