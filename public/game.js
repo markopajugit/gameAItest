@@ -3,6 +3,9 @@ import { TowerManager } from './towerManager.js';
 import { FastTower } from './fastTower.js';
 import { SniperTower } from './sniperTower.js';
 import { AreaTower } from './areaTower.js';
+import { FastEnemy } from './fastEnemy.js';
+import { TankEnemy } from './tankEnemy.js';
+import { StealthEnemy } from './stealthEnemy.js';
 
 // Set up the canvas
 const canvas = document.createElement('canvas');
@@ -22,7 +25,7 @@ const towerManager = new TowerManager(tileSize, towers);
 
 // Define the path for the enemies
 const path = [
-    { x: 950, y: 500 }, // Start point
+    { x: 1000, y: 500 }, // Start point
     { x: 800, y: 500 }, // Move left
     { x: 800, y: 300 }, // Move up
     { x: 600, y: 300 }, // Move left
@@ -31,17 +34,28 @@ const path = [
     { x: 400, y: 200 }, // Move up
     { x: 200, y: 200 }, // Move left
     { x: 200, y: 500 }, // Move down
-    { x: 50, y: 500 }   // End point
+    { x: 0, y: 500 }   // End point
 ];
 
 // Manage enemies
 const enemies = [];
 let enemyCount = 0;
 
-// Spawn enemies at intervals
+// Function to randomly spawn different types of enemies
 function spawnEnemies() {
-    if (enemyCount < 10) { // Limit to 10 enemies
-        enemies.push(new Enemy(path, 100)); // Enemies start with 100 health
+    if (enemyCount < 20) { // Limit to 20 enemies
+        const randomType = Math.random();
+        let newEnemy;
+
+        if (randomType < 0.4) {
+            newEnemy = new FastEnemy(path);
+        } else if (randomType < 0.7) {
+            newEnemy = new TankEnemy(path);
+        } else {
+            newEnemy = new StealthEnemy(path);
+        }
+
+        enemies.push(newEnemy);
         enemyCount++;
     }
 }
