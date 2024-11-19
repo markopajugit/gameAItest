@@ -14,7 +14,6 @@ export class AreaTower extends Tower {
 
             // Apply damage to all enemies in range
             enemiesInRange.forEach(enemy => {
-                console.log(`AreaTower damaging enemy at (${enemy.x}, ${enemy.y})`);
                 enemy.takeDamage(this.damage);
             });
 

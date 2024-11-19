@@ -1,8 +1,6 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const fastEnemy = require('./features/enemies/fastEnemy');
-const tankEnemy = require('./features/enemies/tankEnemy');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,38 +16,10 @@ let gameState = {
     gold: {},           // { playerId: goldAmount }
 };
 
-// Registry of enemy types
-const enemyTypes = {
-    fast: fastEnemy,
-    tank: tankEnemy,
-};
 
-// Spawn enemies
-function spawnEnemy() {
-    const type = Math.random() > 0.5 ? 'fast' : 'tank';
-    const enemy = enemyTypes[type].createEnemy();
-    gameState.enemies.push(enemy);
-    broadcastGameState();
-}
 
-// Move enemies
-function moveEnemies() {
-    gameState.enemies.forEach((enemy) => {
-        const movement = enemy.speed;
-        enemy.y += movement;
-        if (enemy.y > 600) {
-            gameState.health -= 1;
-            enemy.health = 0; // Mark for removal
-        }
-    });
-    gameState.enemies = gameState.enemies.filter((e) => e.health > 0);
-    broadcastGameState();
 
-    if (gameState.health <= 0) {
-        io.emit('game-over', { message: 'Game Over!' });
-        resetGame();
-    }
-}
+
 
 // Broadcast game state
 function broadcastGameState() {
@@ -63,7 +33,7 @@ function resetGame() {
         enemies: [],
         health: 20,
         gold: {},
-    };
+    }
 }
 
 // Player connection
@@ -87,9 +57,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Start enemy spawn and movement
-setInterval(spawnEnemy, 3000);
-setInterval(moveEnemies, 100);
 
 // Start server
 const PORT = 4000;

@@ -1,6 +1,6 @@
 import { Enemy } from './enemy.js';
 import { TowerManager } from './towerManager.js';
-import { FastTower } from './fastTower.js'; // Import tower types
+import { FastTower } from './fastTower.js';
 import { SniperTower } from './sniperTower.js';
 import { AreaTower } from './areaTower.js';
 
@@ -40,7 +40,7 @@ let enemyCount = 0;
 
 // Spawn enemies at intervals
 function spawnEnemies() {
-    if (enemyCount < 1) { // Limit to 10 enemies
+    if (enemyCount < 10) { // Limit to 10 enemies
         enemies.push(new Enemy(path, 100)); // Enemies start with 100 health
         enemyCount++;
     }
@@ -61,7 +61,7 @@ function drawGrid() {
 // Highlight the hovered tile
 function highlightHoveredTile() {
     if (hoverTile.x !== null && hoverTile.y !== null) {
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'; // Semi-transparent red
+        ctx.fillStyle = towerManager.getHoverColor(); // Get the color based on the selected tower type
         ctx.fillRect(hoverTile.x, hoverTile.y, tileSize, tileSize);
     }
 }

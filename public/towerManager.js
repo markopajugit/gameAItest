@@ -15,9 +15,22 @@ export class TowerManager {
         console.log(`Selected Tower: ${this.selectedTowerType}`);
     }
 
+    // Get the hover color based on the selected tower type
+    getHoverColor() {
+        switch (this.selectedTowerType) {
+            case 'FastTower':
+                return 'blue';
+            case 'SniperTower':
+                return 'purple';
+            case 'AreaTower':
+                return 'orange';
+            default:
+                return 'red';
+        }
+    }
+
     // Place a tower on the specified tile
     placeTower(tileX, tileY) {
-        // Check if there's already a tower on this tile
         if (this.towers.some(tower => tower.x === tileX && tower.y === tileY)) {
             console.log(`Tile (${tileX / this.tileSize}, ${tileY / this.tileSize}) already has a tower!`);
             return;
@@ -32,7 +45,7 @@ export class TowerManager {
             newTower = new AreaTower(tileX, tileY, this.tileSize);
         }
 
-        this.towers.push(newTower); // Add the new tower
+        this.towers.push(newTower);
         console.log(`Placed a ${this.selectedTowerType} at (${tileX / this.tileSize}, ${tileY / this.tileSize})`);
     }
 }

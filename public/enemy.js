@@ -65,7 +65,6 @@ export class Enemy {
 
     // Take damage (for later interactions with towers)
     takeDamage(amount) {
-        console.log("took damage: " + amount);
         this.currentHealth -= amount;
         if (this.currentHealth < 0) {
             this.currentHealth = 0; // Ensure health doesn’t drop below 0

@@ -44,7 +44,6 @@ export class Tower {
         // Check if the enemy is within range and if enough time has passed since the last attack
         if (this.isEnemyInRange(enemy) && (currentTime - this.lastAttackTime >= 1000 / this.attackSpeed)) {
             enemy.takeDamage(this.damage);
-            console.log("hit enemy");
             this.lastAttackTime = currentTime; // Update last attack time
         }
     }
