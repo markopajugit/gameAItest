@@ -27,8 +27,8 @@ const towerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
 const light = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(light);
-camera.position.set(0, 200, 300);
-camera.lookAt(0, 0, 0);
+camera.position.set(0, 400, 0); // Adjust height
+camera.lookAt(0, 0, 0);         // Look at the game center
 
 let gameState = { towers: {}, enemies: [], health: 20, gold: 200 };
 
