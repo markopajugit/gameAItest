@@ -15,6 +15,9 @@ document.body.appendChild(canvas);
 
 const ctx = canvas.getContext('2d');
 
+// Money system
+let money = 100; // Starting money
+
 // Grid settings
 const tileSize = 50; // Size of each grid tile
 let hoverTile = { x: null, y: null }; // Track the hovered tile
@@ -41,15 +44,26 @@ const path = [
 const enemies = [];
 let enemyCount = 0;
 
+// Remove defeated enemies and reward money
+function handleEnemyDefeat() {
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        if (enemies[i].currentHealth <= 0) {
+            money += enemies[i].reward; // Add the reward to the player's money
+            console.log(`Enemy defeated! Earned $${enemies[i].reward}. Total money: $${money}`);
+            enemies.splice(i, 1); // Remove the defeated enemy
+        }
+    }
+}
+
 // Function to randomly spawn different types of enemies
 function spawnEnemies() {
     if (enemyCount < 20) { // Limit to 20 enemies
         const randomType = Math.random();
         let newEnemy;
 
-        if (randomType < 0.4) {
+        if (randomType < 0.5) {
             newEnemy = new FastEnemy(path);
-        } else if (randomType < 0.7) {
+        } else if (randomType < 0.65) {
             newEnemy = new TankEnemy(path);
         } else {
             newEnemy = new StealthEnemy(path);
@@ -80,6 +94,13 @@ function highlightHoveredTile() {
     }
 }
 
+// Display money on the screen
+function displayMoney() {
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Money: $${money}`, 10, 30); // Top-left corner
+}
+
 // Draw towers
 function drawTowers() {
     towers.forEach(tower => tower.draw(ctx)); // Call the draw method of each tower
@@ -107,7 +128,15 @@ canvas.addEventListener('click', (event) => {
     const tileY = Math.floor(mouseY / tileSize) * tileSize;
 
     // Delegate tower placement to the TowerManager
-    towerManager.placeTower(tileX, tileY);
+    const towerCost = towerManager.getTowerCost();
+    if (money >= towerCost) {
+        if (towerManager.placeTower(tileX, tileY)) {
+            money -= towerCost; // Deduct the cost
+
+        }
+    } else {
+        console.log(`Not enough money to place this tower! Current money: $${money}`);
+    }
 });
 
 // Switch tower type based on user input (e.g., keys)
@@ -134,6 +163,7 @@ function drawPath() {
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
 
+    displayMoney(); // Display current money
     drawGrid(); // Draw the grid
     drawPath(); // Draw the path
     drawTowers(); // Draw the towers
@@ -148,7 +178,7 @@ function gameLoop() {
     // Make towers attack enemies
     towers.forEach(tower => {
         if (tower instanceof AreaTower) {
-            tower.attack(enemies, performance.now()); // Pass the enemies array for area damage
+            tower.attack(enemies, performance.now()); // Pass all enemies to AreaTower
         } else {
             enemies.forEach(enemy => {
                 if (enemy.currentHealth > 0) {
@@ -158,13 +188,8 @@ function gameLoop() {
         }
     });
 
-    // Remove enemies with 0 health
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        if (enemies[i].currentHealth <= 0) {
-            console.log('Enemy defeated!');
-            enemies.splice(i, 1);
-        }
-    }
+    // Handle defeated enemies
+    handleEnemyDefeat();
 
     requestAnimationFrame(gameLoop); // Repeat the game loop
 }

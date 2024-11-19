@@ -2,7 +2,7 @@ import { Enemy } from './enemy.js';
 
 export class StealthEnemy extends Enemy {
     constructor(path) {
-        super(path, 80, 3, 'purple'); // Moderate health, moderate speed, purple color
+        super(path, 80, 3, 'purple', 20); // Moderate health, moderate speed, purple color
     }
 
     // Override draw method for unique stealth effect (optional)

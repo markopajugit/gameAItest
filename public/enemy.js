@@ -1,14 +1,15 @@
 export class Enemy {
-    constructor(path, health = 100, speed = 2, color = 'red') {
-        this.path = path; // Reference to the path
-        this.x = path[0].x; // Start at the first point of the path
+    constructor(path, health = 100, speed = 2, color = 'red', reward = 10) {
+        this.path = path;
+        this.x = path[0].x;
         this.y = path[0].y;
-        this.currentPathIndex = 0; // Track which part of the path the enemy is on
-        this.maxHealth = health; // Maximum health
-        this.currentHealth = health; // Current health
-        this.speed = speed; // Speed of the enemy
-        this.size = 10; // Default size (radius of the circle representing the enemy)
-        this.color = color; // Color representing the enemy
+        this.currentPathIndex = 0;
+        this.maxHealth = health;
+        this.currentHealth = health;
+        this.speed = speed;
+        this.size = 10;
+        this.color = color;
+        this.reward = reward; // Money rewarded when defeated
     }
 
     // Update the enemy's position along the path
