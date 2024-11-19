@@ -6,10 +6,37 @@
     <title>3D Tower Defense</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: #333; }
+        /* Optional: Style the Play button */
+        #playButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
-    <script type="module" src="game.js"></script>
+<!-- Play Button -->
+<button id="playButton">Play</button>
+
+<!-- Socket.io Script -->
+<script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
+
+<!-- Script to Load Game on Click -->
+<script>
+    document.getElementById('playButton').addEventListener('click', () => {
+        // Hide the Play button
+        document.getElementById('playButton').style.display = 'none';
+
+        // Dynamically create a script element for game.js
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = 'game.js';
+        document.body.appendChild(script);
+    });
+</script>
 </body>
 </html>

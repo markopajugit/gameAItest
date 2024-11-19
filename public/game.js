@@ -1,84 +1,165 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.js';
+import { Enemy } from './enemy.js';
+import { TowerManager } from './towerManager.js';
+import { FastTower } from './fastTower.js'; // Import tower types
+import { SniperTower } from './sniperTower.js';
+import { AreaTower } from './areaTower.js';
 
-// Use the global "io" object provided by the Socket.IO CDN
-const socket = io(); // Connect to the server
+// Set up the canvas
+const canvas = document.createElement('canvas');
+canvas.width = 1000; // Canvas width
+canvas.height = 1000; // Canvas height
+document.body.appendChild(canvas);
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+const ctx = canvas.getContext('2d');
 
-const geometry = new THREE.PlaneGeometry(800, 600);
-const material = new THREE.MeshBasicMaterial({ color: 0x2c3e50 });
-const map = new THREE.Mesh(geometry, material);
-map.rotation.x = -Math.PI / 2; // Rotate to lie flat
-scene.add(map);
+// Grid settings
+const tileSize = 50; // Size of each grid tile
+let hoverTile = { x: null, y: null }; // Track the hovered tile
+const towers = []; // Array to store Tower instances
 
-// Enemy registry
-const enemyMaterials = {
-    fast: new THREE.MeshBasicMaterial({ color: 0x0000ff }),    // Blue
-    tank: new THREE.MeshBasicMaterial({ color: 0x00ff00 }),    // Green
-};
+// Initialize the TowerManager
+const towerManager = new TowerManager(tileSize, towers);
 
-const enemyGeometry = new THREE.BoxGeometry(5, 5, 5);
-const towerGeometry = new THREE.CylinderGeometry(5, 5, 10);
-const towerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+// Define the path for the enemies
+const path = [
+    { x: 950, y: 500 }, // Start point
+    { x: 800, y: 500 }, // Move left
+    { x: 800, y: 300 }, // Move up
+    { x: 600, y: 300 }, // Move left
+    { x: 600, y: 700 }, // Move down
+    { x: 400, y: 700 }, // Move left
+    { x: 400, y: 200 }, // Move up
+    { x: 200, y: 200 }, // Move left
+    { x: 200, y: 500 }, // Move down
+    { x: 50, y: 500 }   // End point
+];
 
-const light = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(light);
-camera.position.set(0, 400, 0); // Adjust height
-camera.lookAt(0, 0, 0);         // Look at the game center
+// Manage enemies
+const enemies = [];
+let enemyCount = 0;
 
-let gameState = { towers: {}, enemies: [], health: 20, gold: 200 };
-
-socket.on('game-state', (state) => {
-    gameState = state;
-    updateGameObjects();
-});
-
-socket.on('game-over', (data) => {
-    alert(data.message);
-    location.reload();
-});
-
-document.addEventListener('click', (event) => {
-    const rect = renderer.domElement.getBoundingClientRect();
-    const x = (event.clientX / window.innerWidth) * 2 - 1;
-    const y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const mouse = new THREE.Vector2(x, y);
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects([map]);
-    if (intersects.length > 0) {
-        const point = intersects[0].point;
-        socket.emit('place-tower', { x: point.x, y: 10, z: point.z, range: 50, damage: 10 });
+// Spawn enemies at intervals
+function spawnEnemies() {
+    if (enemyCount < 1) { // Limit to 10 enemies
+        enemies.push(new Enemy(path, 100)); // Enemies start with 100 health
+        enemyCount++;
     }
+}
+
+// Draw the grid
+function drawGrid() {
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x < canvas.width; x += tileSize) {
+        for (let y = 0; y < canvas.height; y += tileSize) {
+            ctx.strokeRect(x, y, tileSize, tileSize);
+        }
+    }
+}
+
+// Highlight the hovered tile
+function highlightHoveredTile() {
+    if (hoverTile.x !== null && hoverTile.y !== null) {
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'; // Semi-transparent red
+        ctx.fillRect(hoverTile.x, hoverTile.y, tileSize, tileSize);
+    }
+}
+
+// Draw towers
+function drawTowers() {
+    towers.forEach(tower => tower.draw(ctx)); // Call the draw method of each tower
+}
+
+// Update hoverTile based on mouse position
+canvas.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    // Calculate the top-left corner of the tile the mouse is over
+    hoverTile.x = Math.floor(mouseX / tileSize) * tileSize;
+    hoverTile.y = Math.floor(mouseY / tileSize) * tileSize;
 });
 
-function updateGameObjects() {
-    scene.children = scene.children.filter((obj) => obj === map || obj === light);
+// Handle tile click for placing towers
+canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
 
-    Object.values(gameState.towers).forEach((playerTowers) => {
-        playerTowers.forEach((tower) => {
-            const towerMesh = new THREE.Mesh(towerGeometry, towerMaterial);
-            towerMesh.position.set(tower.x, tower.y, tower.z);
-            scene.add(towerMesh);
-        });
-    });
+    // Calculate the tile coordinates
+    const tileX = Math.floor(mouseX / tileSize) * tileSize;
+    const tileY = Math.floor(mouseY / tileSize) * tileSize;
 
-    gameState.enemies.forEach((enemy) => {
-        const material = enemyMaterials[enemy.type] || new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const enemyMesh = new THREE.Mesh(enemyGeometry, material);
-        enemyMesh.position.set(enemy.x, 5, enemy.y);
-        scene.add(enemyMesh);
-    });
+    // Delegate tower placement to the TowerManager
+    towerManager.placeTower(tileX, tileY);
+});
+
+// Switch tower type based on user input (e.g., keys)
+document.addEventListener('keydown', (event) => {
+    if (event.key === '1') towerManager.selectTowerType('FastTower');
+    if (event.key === '2') towerManager.selectTowerType('SniperTower');
+    if (event.key === '3') towerManager.selectTowerType('AreaTower');
+});
+
+
+// Draw the path
+function drawPath() {
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+    }
+    ctx.stroke();
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+// Game loop
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+    drawGrid(); // Draw the grid
+    drawPath(); // Draw the path
+    drawTowers(); // Draw the towers
+    highlightHoveredTile(); // Highlight the hovered tile
+
+    // Update and draw each enemy
+    enemies.forEach(enemy => {
+        enemy.update();
+        enemy.draw(ctx);
+    });
+
+    // Make towers attack enemies
+    towers.forEach(tower => {
+        if (tower instanceof AreaTower) {
+            tower.attack(enemies, performance.now()); // Pass the enemies array for area damage
+        } else {
+            enemies.forEach(enemy => {
+                if (enemy.currentHealth > 0) {
+                    tower.attack(enemy, performance.now()); // Single-target attack
+                }
+            });
+        }
+    });
+
+    // Remove enemies with 0 health
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        if (enemies[i].currentHealth <= 0) {
+            console.log('Enemy defeated!');
+            enemies.splice(i, 1);
+        }
+    }
+
+    requestAnimationFrame(gameLoop); // Repeat the game loop
 }
-animate();
+
+// Start the game
+function initGame() {
+    drawPath(); // Draw the initial path
+    setInterval(spawnEnemies, 1000); // Spawn an enemy every second
+    gameLoop(); // Start the game loop
+}
+
+initGame();
