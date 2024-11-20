@@ -1,15 +1,73 @@
-// public/game.js
-
 const socket = io();
 
 // Initialize game variables
 let enemies = [];
 let towers = [];
 let lives = 20;
-let playerGold = 100;
+let playerGold = 200;
 let path = [];
 let pathCells = [];
 let currentWave = 1; // Initialize with the first wave
+let selectedTowerType = 'speed'; // Default tower type
+
+const TOWER_COSTS = {
+    splash: 100,
+    speed: 150,
+    sniper: 200,
+};
+
+// Set up the canvas
+const canvas = document.createElement('canvas');
+canvas.width = 1000; // Canvas width
+canvas.height = 1000; // Canvas height
+document.body.appendChild(canvas);
+const ctx = canvas.getContext('2d');
+
+// Grid settings
+const GRID_SIZE = 100; // Size of each grid cell in pixels
+
+// Reference UI elements
+const resetButton = document.getElementById('reset-button');
+const splashTowerButton = document.getElementById('splash-tower-button');
+const speedTowerButton = document.getElementById('speed-tower-button');
+const sniperTowerButton = document.getElementById('sniper-tower-button');
+
+// Handle tower type selection
+splashTowerButton.addEventListener('click', () => {
+    selectedTowerType = 'splash';
+    highlightSelectedTowerButton('splash');
+});
+
+speedTowerButton.addEventListener('click', () => {
+    selectedTowerType = 'speed';
+    highlightSelectedTowerButton('speed');
+});
+
+sniperTowerButton.addEventListener('click', () => {
+    selectedTowerType = 'sniper';
+    highlightSelectedTowerButton('sniper');
+});
+
+// Highlight the selected tower button
+function highlightSelectedTowerButton(type) {
+    // Reset all buttons to default opacity
+    splashTowerButton.style.opacity = '1';
+    speedTowerButton.style.opacity = '1';
+    sniperTowerButton.style.opacity = '1';
+
+    // Highlight the selected button
+    if (type === 'splash') {
+        splashTowerButton.style.opacity = '0.7';
+    } else if (type === 'speed') {
+        speedTowerButton.style.opacity = '0.7';
+    } else if (type === 'sniper') {
+        sniperTowerButton.style.opacity = '0.7';
+    }
+}
+
+// Initialize by highlighting the default selected tower
+highlightSelectedTowerButton(selectedTowerType);
+
 
 // Listen for game state updates from the server
 socket.on('game-state', (gameState) => {
@@ -19,7 +77,7 @@ socket.on('game-state', (gameState) => {
         towers = towers.concat(playerTowers);
     });
     lives = gameState.lives;
-    playerGold = gameState.gold[socket.id] || 100;
+    playerGold = gameState.gold[socket.id] || 200;
     path = gameState.path;
     currentWave = gameState.currentWave || 1; // Update current wave
 
@@ -55,20 +113,6 @@ socket.on('game-over', () => {
 socket.on('not-enough-gold', () => {
     alert('Not enough gold to place a tower!');
 });
-
-
-// Set up the canvas
-const canvas = document.createElement('canvas');
-canvas.width = 1000; // Canvas width
-canvas.height = 1000; // Canvas height
-document.body.appendChild(canvas);
-const ctx = canvas.getContext('2d');
-
-// Grid settings
-const GRID_SIZE = 100; // Size of each grid cell in pixels
-
-// Reference the existing reset button from the HTML
-const resetButton = document.getElementById('reset-button');
 
 // Game loop
 function gameLoop() {
@@ -183,8 +227,16 @@ function drawTower(tower) {
     const cellX = tower.x - GRID_SIZE / 2;
     const cellY = tower.y - GRID_SIZE / 2;
 
-    // Fill the entire grid cell with a semi-transparent color
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.2)'; // Green with 20% opacity
+    // Fill the entire grid cell with a semi-transparent color based on tower type
+    let fillColor = 'rgba(0, 255, 0, 0.2)'; // Default green for Splash Tower
+    if (tower.type === 'splash') {
+        fillColor = 'rgba(255, 165, 0, 0.2)'; // Orange
+    } else if (tower.type === 'speed') {
+        fillColor = 'rgba(0, 0, 255, 0.2)'; // Blue
+    } else if (tower.type === 'sniper') {
+        fillColor = 'rgba(128, 0, 128, 0.2)'; // Purple
+    }
+    ctx.fillStyle = fillColor;
     ctx.fillRect(cellX, cellY, GRID_SIZE, GRID_SIZE);
 
     // Optionally draw tower range
@@ -237,13 +289,29 @@ canvas.addEventListener('click', (event) => {
         return;
     }
 
-    // Create a tower object
-    const tower = {
+    // Define tower properties based on selected type
+    let tower = {
         x: snappedX,
         y: snappedY,
-        range: 160, // Example range
-        damage: 10, // Example damage
+        type: selectedTowerType, // Include tower type
+        range: 100, // Default range
+        damage: 10, // Default damage
     };
+
+    // Set specific properties based on tower type
+    if (selectedTowerType === 'splash') {
+        tower.range = 100;
+        tower.damage = 10;
+        tower.attackSpeed = 1; // 1 attack per second
+    } else if (selectedTowerType === 'speed') {
+        tower.range = 80;
+        tower.damage = 5;
+        tower.attackSpeed = 5; // 5 attacks per second
+    } else if (selectedTowerType === 'sniper') {
+        tower.range = 200;
+        tower.damage = 30;
+        tower.attackSpeed = 0.5; // 0.5 attacks per second
+    }
 
     // Send tower placement to server
     socket.emit('place-tower', tower);

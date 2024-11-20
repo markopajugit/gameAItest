@@ -13,7 +13,7 @@ class Enemy {
         this.color = color;
         this.reward = reward; // Gold rewarded when defeated
         this.lastAttacker = null;
-        this.rewardGiven = false;
+        this.rewardGiven = false; // Initialize to false
     }
 
     // Update the enemy's position along the path

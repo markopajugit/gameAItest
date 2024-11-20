@@ -30,9 +30,46 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+        #tower-selection {
+            position: absolute;
+            bottom: 40px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 1; /* Ensure it appears above the canvas */
+        }
+        .tower-button {
+            padding: 10px 15px;
+            font-size: 14px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        /* Specific colors for different tower types */
+        .splash-button {
+            background-color: #FF9800; /* Orange */
+        }
+        .speed-button {
+            background-color: #2196F3; /* Blue */
+        }
+        .sniper-button {
+            background-color: #9C27B0; /* Purple */
+        }
+        /* Hover effects for buttons */
+        .tower-button:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
+<div id="tower-selection">
+    <button class="tower-button splash-button" id="splash-tower-button">Splash Tower ($100)</button>
+    <button class="tower-button speed-button" id="speed-tower-button">Speed Tower ($150)</button>
+    <button class="tower-button sniper-button" id="sniper-tower-button">Sniper Tower ($200)</button>
+</div>
 <!-- Play Button -->
 <button id="playButton">Play</button>
 <button id="reset-button">Reset Game</button>

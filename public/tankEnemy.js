@@ -1,4 +1,4 @@
-import { Enemy } from './enemy.js';
+import { Enemy } from '../enemy.js';
 
 export class TankEnemy extends Enemy {
     constructor(path) {
