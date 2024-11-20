@@ -1,8 +1,8 @@
 import { Tower } from './tower.js';
 
 export class AreaTower extends Tower {
-    constructor(x, y, tileSize) {
-        super(x, y, tileSize, 150, 10, 1); // Medium range, medium damage, moderate attack speed
+    constructor(playerId, x, y, tileSize, type = 'areaTower') {
+        super(playerId, x, y, tileSize, type, 150, 10, 1); // Medium range, medium damage, moderate attack speed
     }
 
     // Override attack to apply area damage

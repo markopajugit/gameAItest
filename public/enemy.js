@@ -1,4 +1,6 @@
-export class Enemy {
+// enemy.js
+
+class Enemy {
     constructor(path, health = 100, speed = 2, color = 'red', reward = 10) {
         this.path = path;
         this.x = path[0].x;
@@ -9,7 +11,9 @@ export class Enemy {
         this.speed = speed;
         this.size = 10;
         this.color = color;
-        this.reward = reward; // Money rewarded when defeated
+        this.reward = reward; // Gold rewarded when defeated
+        this.lastAttacker = null;
+        this.rewardGiven = false;
     }
 
     // Update the enemy's position along the path
@@ -31,38 +35,12 @@ export class Enemy {
         }
     }
 
-    // Draw the enemy and its health bar
-    draw(ctx) {
-        // Draw the enemy as a colored circle
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Draw the health bar
-        const healthBarWidth = 60;
-        const healthBarHeight = 10;
-        const healthBarX = this.x - healthBarWidth / 2;
-        const healthBarY = this.y - 20;
-
-        // Background (max health)
-        ctx.fillStyle = 'grey';
-        ctx.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
-
-        // Foreground (current health)
-        const healthPercentage = this.currentHealth / this.maxHealth;
-        ctx.fillStyle = 'green';
-        ctx.fillRect(healthBarX, healthBarY, healthBarWidth * healthPercentage, healthBarHeight);
-
-        // Border
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
-    }
-
     // Take damage
     takeDamage(amount) {
         this.currentHealth -= amount;
         if (this.currentHealth < 0) this.currentHealth = 0;
     }
 }
+
+// Export the Enemy class
+module.exports = Enemy;

@@ -1,8 +1,10 @@
 export class Tower {
-    constructor(x, y, tileSize, range = 100, damage = 1, attackSpeed = 1) {
+    constructor(playerId, x, y, tileSize, type, range = 100, damage = 1, attackSpeed = 1) {
+        this.playerId = playerId;
         this.x = x; // Top-left corner x-coordinate of the tower
         this.y = y; // Top-left corner y-coordinate of the tower
         this.tileSize = tileSize; // Size of the tile the tower occupies
+        this.type = type;
         this.range = range; // Damage range of the tower
         this.damage = damage; // Damage per attack
         this.attackSpeed = attackSpeed; // How often the tower attacks (times per second)

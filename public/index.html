@@ -16,12 +16,26 @@
             font-size: 24px;
             cursor: pointer;
         }
+        /* Style for the reset button */
+        #reset-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff4d4d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
     </style>
 </head>
 <body>
 <!-- Play Button -->
 <button id="playButton">Play</button>
-
+<button id="reset-button">Reset Game</button>
 <!-- Socket.io Script -->
 <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
 
